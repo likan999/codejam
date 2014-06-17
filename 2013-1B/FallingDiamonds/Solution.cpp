@@ -1,5 +1,8 @@
+#include <algorithm>
 #include <cmath>
-#include <iostream>
+
+#include "common.h"
+
 using namespace std;
 
 int floorSqrt(int n) {
@@ -15,7 +18,7 @@ double addExp(double x, double y) {
   return normalization + log(1 + exp(other));
 }
 
-double solve(int n, int x, int y) {
+double compute(int n, int x, int y) {
   if (x < 0) {
     x = -x;
   }
@@ -45,11 +48,5 @@ double solve(int n, int x, int y) {
 }
 
 int main() {
-  int numCases;
-  cin >> numCases;
-  for (int i = 1; i <= numCases; i++) {
-    int n, x, y;
-    cin >> n >> x >> y;
-    cout << "Case #" << i << ": " << solve(n, x, y) << endl;
-  }
+  run(&compute);
 }

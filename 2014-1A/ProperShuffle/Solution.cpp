@@ -1,19 +1,20 @@
-#include <algorithm>
 #include <cmath>
-#include <cstdlib>
-#include <iostream>
-#include <numeric>
 #include <vector>
+
+#include <glog/logging.h>
+
+#include "common.h"
+
 using namespace std;
 
-#define CHECK(expr) do { if (!(expr)) { cerr << __FILE__ << "(" << __LINE__ << ": " << #expr << " failed"; exit(1); } } while(false)
+vector<vector<double>> P(1000);
+double threshold;
 
 double f(double p) {
   return 1000 * p;
 }
 
-int main() {
-  vector<vector<double>> P(1000);
+void initialize() {
   for (int i = 0; i < 1000; i++) {
     P[i].resize(1000);
     P[i][i] = 1;
@@ -31,7 +32,7 @@ int main() {
     }
   }
 
-  double threshold = 0;
+  threshold = 0;
   for (int i = 0; i < 1000; i++) {
     for (int j = 0; j < 1000; j++) {
       double p = P[i][j];
@@ -41,20 +42,18 @@ int main() {
     }
   }
   threshold /= 2;
+}
 
-  int numCases;
-  cin >> numCases;
-  CHECK(numCases == 120);
-  for (int i = 0; i < numCases; i++) {
-    int n;
-    cin >> n;
-    CHECK(n == 1000);
-    double sum = 0;
-    for (int j = 0; j < n; j++) {
-      int value;
-      cin >> value;
-      sum += f(P[j][value]);
-    }
-    cout << "Case #" << (i + 1) << ": " << (sum <= threshold ? "GOOD" : "BAD") << endl;
+const char* classify(const vector<int>& v) {
+  CHECK(v.size() == 1000);
+  double sum = 0;
+  for (size_t j = 0; j < v.size(); j++) {
+    sum += f(P[j][v[j]]);
   }
+  return sum <= threshold ? "GOOD" : "BAD";
+}
+
+int main() {
+  initialize();
+  run(&classify);
 }
