@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 
-project(2013-1B)
+project(2014)
 
-add_subdirectory(FallingDiamonds)
+add_subdirectory(Round1A)
