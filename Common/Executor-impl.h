@@ -43,13 +43,15 @@ void FunctionalExecutor::setSolverWrapper(Out (*solver)(In...), std::istream& is
     is.exceptions(std::istream::failbit);
 
     size_t n;
-    is >> n;
+    io::Reader<size_t>::read(is, n);
     for (size_t i = 1; i <= n; i++) {
-      std::tuple<typename std::decay<In>::type...> input;
-      io::read(is, input);
-      typename std::decay<Out>::type output = invoke(solver, input);
+      using Input = std::tuple<typename std::decay<In>::type...>;
+      Input input;
+      io::Reader<Input>::read(is, input);
+      using Output = typename std::decay<Out>::type;
+      Output output = invoke(solver, input);
       os << "Case #" << i << ": ";
-      io::write(os, output);
+      io::Writer<Output>::write(os, output);
       os << '\n';
     }
   };
