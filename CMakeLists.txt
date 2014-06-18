@@ -43,5 +43,6 @@ include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR})
 
 add_subdirectory(Common)
+add_subdirectory(2008)
 add_subdirectory(2013)
 add_subdirectory(2014)
