@@ -6,8 +6,10 @@
 
 class Executor {
  public:
-  virtual ~Executor();
+  virtual ~Executor() = default;
+
   virtual void run() = 0;
+
   static void runInstance();
 
  private:
@@ -18,12 +20,9 @@ class Executor {
 class FunctionalExecutor : public Executor {
  public:
   template <typename Out, typename... In>
-  FunctionalExecutor(Out (*solver)(In...), std::istream& is = std::cin, std::ostream& os = std::cout);
+  FunctionalExecutor(Out (*solver)(In...), void (*initializer)() = nullptr, std::istream& is = std::cin, std::ostream& os = std::cout);
 
-  template <typename Out, typename... In>
-  FunctionalExecutor(Out (*solver)(In...), void (*initializer)(), std::istream& is = std::cin, std::ostream& os = std::cout);
-
-  virtual ~FunctionalExecutor();
+  virtual ~FunctionalExecutor() = default;
 
   virtual void run();
 
