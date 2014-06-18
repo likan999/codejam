@@ -59,14 +59,14 @@ void Writer<T, Enabled>::write(std::ostream& os, const T& output) {
 
 // Specialization for tuple types such as std::tuple, std::pair, std::array, etc.
 template <typename Tuple>
-struct Reader<Tuple, typename std::enable_if<(std::tuple_size<Tuple>::value > 0)>::type> {
+struct Reader<Tuple, typename std::enable_if<(std::tuple_size<Tuple>::value >= 0)>::type> {
   static void read(std::istream& is, Tuple& input) {
     TupleReader<0, Tuple>::read(is, input);
   }
 };
 
 template <typename Tuple>
-struct Writer<Tuple, typename std::enable_if<(std::tuple_size<Tuple>::value > 0)>::type> {
+struct Writer<Tuple, typename std::enable_if<(std::tuple_size<Tuple>::value >= 0)>::type> {
   static void write(std::ostream& os, Tuple& output) {
     TupleWriter<0, Tuple>::write(os, output);
   }
