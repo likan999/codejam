@@ -11,11 +11,7 @@ using namespace std;
 #include "Common/Executor.h"
 #include "Common/Io.h"
 
-namespace io {
-template <> struct Reader<std::string, void> : WholeLineStringReader {};
-}
-
-int compute(vector<string> engines, vector<string> queries) {
+int compute(io::StringOccupiesWholeLine<>, vector<string> engines, vector<string> queries) {
   const size_t npos = static_cast<size_t>(-1);
   size_t s = engines.size(), q = queries.size();
   if (q == 0) {
