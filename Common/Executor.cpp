@@ -8,8 +8,8 @@ void Executor::runInstance() {
 }
 
 void FunctionalExecutor::run() {
-  if (initializerWrapper_) {
-    initializerWrapper_();
+  if (initializer_) {
+    initializer_();
   }
   solverWrapper_();
 }

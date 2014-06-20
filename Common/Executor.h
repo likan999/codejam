@@ -27,11 +27,7 @@ class FunctionalExecutor : public Executor {
   virtual void run();
 
  private:
-  template <typename Out, typename... In>
-  void setSolverWrapper(Out (*solver)(In...), std::istream& is, std::ostream& os);
-
- private:
-  std::function<void()> initializerWrapper_;
+  std::function<void()> initializer_;
   std::function<void()> solverWrapper_;
 };
 
