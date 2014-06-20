@@ -5,8 +5,8 @@
 #include <iostream>
 #include <tuple>
 
-#include "Common/Io.h"
 #include "Common/IntegerSequence.h"
+#include "Common/Io.h"
 
 namespace detail {
 
