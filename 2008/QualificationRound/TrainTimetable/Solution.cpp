@@ -1,31 +1,14 @@
 #include <algorithm>
-#include <iostream>
-#include <sstream>
+#include <tuple>
 #include <utility>
+#include <vector>
 
 using namespace std;
 
 #include "Common/Executor.h"
+#include "Common/Io.h"
 
-pair<vector<int>, vector<int>> readTrips(int n, int turnaround) {
-  pair<vector<int>, vector<int>> trips;
-  for (int i = 0; i < n; i++) {
-    string departure, arrival;
-    cin >> departure >> arrival;
-    departure[2] = ' ';
-    arrival[2] = ' ';
-    stringstream departureSS(departure);
-    int hour, minute;
-    departureSS >> hour >> minute;
-    trips.first.emplace_back(hour * 60 + minute);
-    stringstream arrivalSS(arrival);
-    arrivalSS >> hour >> minute;
-    trips.second.emplace_back(hour * 60 + minute + turnaround);
-  }
-  sort(trips.first.begin(), trips.first.end());
-  sort(trips.second.begin(), trips.second.end());
-  return trips;
-}
+constexpr char Format[] = "%d:%d %d:%d";
 
 int computeOneSide(const vector<int>& departure, const vector<int>& arrival) {
   int total = 0;
@@ -40,15 +23,30 @@ int computeOneSide(const vector<int>& departure, const vector<int>& arrival) {
   return total;
 }
 
-pair<int, int> compute() {
-  int turnaround;
-  cin >> turnaround;
-  int nA, nB;
-  cin >> nA >> nB;
-  auto aTrips = readTrips(nA, turnaround);
-  auto bTrips = readTrips(nB, turnaround);
+template <typename Trip>
+pair<vector<int>, vector<int>> computeTraintable(const vector<Trip>& trips, int turnaround) {
+  pair<vector<int>, vector<int>> table;
+  for (const auto& t: trips) {
+    table.first.emplace_back(get<1>(t) * 60 + get<2>(t));
+    table.second.emplace_back(get<3>(t) * 60 + get<4>(t) + turnaround);
+  }
+  sort(table.first.begin(), table.first.end());
+  sort(table.second.begin(), table.second.end());
 
-  return make_pair(computeOneSide(aTrips.first, bTrips.second), computeOneSide(bTrips.first, aTrips.second));
+  return table;
+}
+
+pair<int, int> compute(
+    int turnaround,
+    io::PackedVector<2>,
+    const vector<tuple<io::Scanf<4, Format>, int, int, int, int>>& aTrips,
+    const vector<tuple<io::Scanf<4, Format>, int, int, int, int>>& bTrips) {
+  vector<int> aDeparture, aArrival;
+  vector<int> bDeparture, bArrival;
+  tie(aDeparture, aArrival) = computeTraintable(aTrips, turnaround);
+  tie(bDeparture, bArrival) = computeTraintable(bTrips, turnaround);
+
+  return make_pair(computeOneSide(aDeparture, bArrival), computeOneSide(bDeparture, aArrival));
 }
 
 std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));

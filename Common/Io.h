@@ -39,6 +39,13 @@ struct Scanf {
   static constexpr const char* format = Format;
 };
 
+// A dummy parameter placed before N vector parameters to inform the reader to
+// first read all their sizes first.
+template <std::size_t N>
+struct PackedVector {
+  static constexpr std::size_t value = N;
+};
+
 // A dummy parameter placed in the function parameter list to inform reader that
 // each of the following std::string parameters take whole lines.
 template <bool Enabled = true>

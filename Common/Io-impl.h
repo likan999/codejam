@@ -16,6 +16,14 @@ namespace io {
 
 namespace detail {
 
+template <typename Option, typename T>
+void readVectorElements(std::istream& is, std::vector<T>& v, std::size_t size) {
+  v.resize(size);
+  for (std::size_t i = 0; i < size; i++) {
+    Reader<T, Option>::read(is, v[i]);
+  }
+}
+
 template <typename Tuple, typename Option, std::size_t NextIndex, typename... Elements> struct TupleReader;
 
 template <std::size_t NextIndex, typename Option, typename Tuple, std::size_t... Indices>
@@ -69,6 +77,32 @@ struct TupleReader<Tuple, Option, NextIndex, StringOccupiesWholeLine<Enabled>, E
   }
 };
 
+template <typename Tuple, typename Option, std::size_t NextIndex, size_t N, typename... Elements>
+struct TupleReader<Tuple, Option, NextIndex, PackedVector<N>, Elements...> {
+  static_assert(NextIndex + 1 + sizeof...(Elements) == std::tuple_size<Tuple>::value && sizeof...(Elements) >= N, "Incorrect template parameter");
+
+  template <std::size_t... Indices>
+  static void readSizes(std::istream& is, std::size_t sizes[N], cxx14::index_sequence<Indices...>) {
+    int dummy[] = {
+      ((void)Reader<std::size_t, Option>::read(is, sizes[Indices]), 0)...
+    };
+  }
+
+  template <std::size_t... Indices>
+  static void readVectors(std::istream& is, Tuple& tuple, const std::size_t sizes[N], cxx14::index_sequence<Indices...>) {
+    int dummy[] = {
+      ((void)readVectorElements<Option>(is, std::get<NextIndex + 1 + Indices>(tuple), sizes[Indices]), 0)...
+    };
+  }
+
+  static void read(std::istream& is, Tuple& tuple) {
+    std::size_t sizes[N];
+    readSizes(is, sizes, cxx14::make_index_sequence<N>());
+    readVectors(is, tuple, sizes, cxx14::make_index_sequence<N>());
+    readTuple<NextIndex + 1 + N, Option>(is, tuple, cxx14::make_index_sequence<sizeof...(Elements) - N>());
+  }
+};
+
 template <typename Tuple, std::size_t... Indices>
 void writeTuple(std::ostream& os, const Tuple& tuple, cxx14::index_sequence<Indices...>) {
   int dummy[] = {
@@ -119,9 +153,7 @@ struct Reader<std::vector<T>, Option, void> {
     std::size_t size;
     Reader<std::size_t, Option>::read(is, size);
     input.resize(size);
-    for (std::size_t i = 0; i < size; i++) {
-      Reader<T, Option>::read(is, input[i]);
-    }
+    detail::readVectorElements<Option>(is, input, size);
   }
 };
 
