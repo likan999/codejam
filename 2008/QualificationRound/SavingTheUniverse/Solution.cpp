@@ -26,23 +26,17 @@ int compute(io::StringOccupiesWholeLine<>, vector<string> engines, vector<string
     queryIndices.emplace_back(result != engineToIndex.end() ? result->second : npos);
   }
   vector<int> minimumSwitches(s);
-  for (size_t i = q - 1; i >= 1; i--) {
-    size_t currentQuery = queryIndices[i];
-    if (currentQuery != npos) {
-      int minimumSwitch = numeric_limits<int>::max();
+  int minimumSwitch;
+  for (size_t i = q; i > 0; i--) {
+    size_t currentQuery = queryIndices[i - 1];
+    if (currentQuery != npos || i == 1) {
+      minimumSwitch = numeric_limits<int>::max();
       for (size_t j = 0; j < s; j++) {
         if (j != currentQuery) {
           minimumSwitch = min(minimumSwitch, minimumSwitches[j]);
         }
       }
       minimumSwitches[currentQuery] = 1 + minimumSwitch;
-    }
-  }
-  size_t firstQuery = queryIndices[0];
-  int minimumSwitch = numeric_limits<int>::max();
-  for (size_t i = 0; i < s; i++) {
-    if (i != firstQuery) {
-      minimumSwitch = min(minimumSwitch, minimumSwitches[i]);
     }
   }
   return minimumSwitch;
