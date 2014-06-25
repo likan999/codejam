@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -26,10 +28,10 @@ void readVectorElements(std::istream& is, std::vector<T>& v, std::size_t size) {
 
 template <typename Tuple, typename Option, std::size_t NextIndex, typename... Elements> struct TupleReader;
 
-template <std::size_t NextIndex, typename Option, typename Tuple, std::size_t... Indices>
-void readTuple(std::istream& is, Tuple& tuple, cxx14::index_sequence<Indices...>) {
-  static_assert(NextIndex + sizeof...(Indices) == std::tuple_size<Tuple>::value, "Incorrect template parameter");
-  TupleReader<Tuple, Option, NextIndex, typename std::tuple_element<NextIndex + Indices, Tuple>::type...>::read(is, tuple);
+template <std::size_t NextIndex, typename Option, typename Tuple, std::size_t... I>
+void readTuple(std::istream& is, Tuple& tuple, cxx14::index_sequence<I...>) {
+  static_assert(NextIndex + sizeof...(I) == std::tuple_size<Tuple>::value, "Incorrect template parameter");
+  TupleReader<Tuple, Option, NextIndex, typename std::tuple_element<NextIndex + I, Tuple>::type...>::read(is, tuple);
 }
 
 template <typename Tuple, typename Option, std::size_t NextIndex>
@@ -56,13 +58,48 @@ template <typename Tuple, typename Option, std::size_t NextIndex, std::size_t N,
 struct TupleReader<Tuple, Option, NextIndex, Scanf<N, Format>, Elements...> {
   static_assert(NextIndex + 1 + sizeof...(Elements) == std::tuple_size<Tuple>::value && sizeof...(Elements) >= N, "Incorrect template parameter");
 
-  template <std::size_t... Indices>
-  static void read(std::istream& is, Tuple& tuple, cxx14::index_sequence<Indices...>) {
-    CHECK(N == io::streamScanf(is, Format, &std::get<NextIndex + 1 + Indices>(tuple)...));
+  template <std::size_t... I>
+  static void read(std::istream& is, Tuple& tuple, cxx14::index_sequence<I...>) {
+    CHECK(N == io::streamScanf(is, Format, &std::get<NextIndex + 1 + I>(tuple)...));
   }
 
   static void read(std::istream& is, Tuple& tuple) {
     read(is, tuple, cxx14::make_index_sequence<N>());
+    readTuple<NextIndex + 1 + N, Option>(is, tuple, cxx14::make_index_sequence<sizeof...(Elements) - N>());
+  }
+};
+
+template <typename Tuple, typename Option, std::size_t NextIndex, size_t N, size_t M, size_t... Indices, typename... Elements>
+struct TupleReader<Tuple, Option, NextIndex, PackedVector<N, M, Indices...>, Elements...> {
+  static_assert(sizeof...(Indices) == 0 || sizeof...(Indices) == N, "Indices list should have exactly N elements if it is not omitted");
+  static_assert(sizeof...(Indices) > 0 || N == M, "PackedVector should have the same N and M if Indices list is omitted");
+  static_assert(NextIndex + 1 + sizeof...(Elements) == std::tuple_size<Tuple>::value && sizeof...(Elements) >= N, "Incorrect template parameter");
+
+  template <std::size_t... I>
+  static void readSizes(std::istream& is, std::size_t sizes[M], cxx14::index_sequence<I...>) {
+    int dummy[] = {
+      ((void)Reader<std::size_t, Option>::read(is, sizes[I]), 0)...
+    };
+  }
+
+  template <std::size_t... I>
+  static void readVectors(std::istream& is, Tuple& tuple, const std::size_t sizes[N], cxx14::index_sequence<I...>, cxx14::index_sequence<>) {
+    int dummy[] = {
+      ((void)readVectorElements<Option>(is, std::get<NextIndex + 1 + I>(tuple), sizes[I]), 0)...
+    };
+  }
+
+  template <std::size_t... I, size_t... J>
+  static void readVectors(std::istream& is, Tuple& tuple, const std::size_t sizes[N], cxx14::index_sequence<I...>, cxx14::index_sequence<J...>) {
+    int dummy[] = {
+      ((void)readVectorElements<Option>(is, std::get<NextIndex + 1 + I>(tuple), sizes[ktl::NthIndex<I, J...>::value]), 0)...
+    };
+  }
+
+  static void read(std::istream& is, Tuple& tuple) {
+    std::size_t sizes[M];
+    readSizes(is, sizes, cxx14::make_index_sequence<M>());
+    readVectors(is, tuple, sizes, cxx14::make_index_sequence<N>(), cxx14::index_sequence<Indices...>());
     readTuple<NextIndex + 1 + N, Option>(is, tuple, cxx14::make_index_sequence<sizeof...(Elements) - N>());
   }
 };
@@ -77,36 +114,10 @@ struct TupleReader<Tuple, Option, NextIndex, StringOccupiesWholeLine<Enabled>, E
   }
 };
 
-template <typename Tuple, typename Option, std::size_t NextIndex, size_t N, typename... Elements>
-struct TupleReader<Tuple, Option, NextIndex, PackedVector<N>, Elements...> {
-  static_assert(NextIndex + 1 + sizeof...(Elements) == std::tuple_size<Tuple>::value && sizeof...(Elements) >= N, "Incorrect template parameter");
-
-  template <std::size_t... Indices>
-  static void readSizes(std::istream& is, std::size_t sizes[N], cxx14::index_sequence<Indices...>) {
-    int dummy[] = {
-      ((void)Reader<std::size_t, Option>::read(is, sizes[Indices]), 0)...
-    };
-  }
-
-  template <std::size_t... Indices>
-  static void readVectors(std::istream& is, Tuple& tuple, const std::size_t sizes[N], cxx14::index_sequence<Indices...>) {
-    int dummy[] = {
-      ((void)readVectorElements<Option>(is, std::get<NextIndex + 1 + Indices>(tuple), sizes[Indices]), 0)...
-    };
-  }
-
-  static void read(std::istream& is, Tuple& tuple) {
-    std::size_t sizes[N];
-    readSizes(is, sizes, cxx14::make_index_sequence<N>());
-    readVectors(is, tuple, sizes, cxx14::make_index_sequence<N>());
-    readTuple<NextIndex + 1 + N, Option>(is, tuple, cxx14::make_index_sequence<sizeof...(Elements) - N>());
-  }
-};
-
-template <typename Tuple, std::size_t... Indices>
-void writeTuple(std::ostream& os, const Tuple& tuple, cxx14::index_sequence<Indices...>) {
+template <typename Tuple, std::size_t... I>
+void writeTuple(std::ostream& os, const Tuple& tuple, cxx14::index_sequence<I...>) {
   int dummy[] = {
-    (Indices == 0 ? (void)0 : (void)(os << ' '), Writer<typename std::tuple_element<Indices, Tuple>::type>::write(os, std::get<Indices>(tuple)), 0)...
+    (I == 0 ? (void)0 : (void)(os << ' '), Writer<typename std::tuple_element<I, Tuple>::type>::write(os, std::get<I>(tuple)), 0)...
   };
 }
 
@@ -142,7 +153,7 @@ struct Writer<Tuple, typename std::enable_if<(std::tuple_size<Tuple>::value >= 0
 template <typename Option>
 struct Reader<std::string, Option, typename std::enable_if<Option::StringOccupiesWholeLine>::type> {
   static void read(std::istream& is, std::string& input) {
-    while (std::getline(is, input) && input.empty());
+    while (std::getline(is, input) && std::all_of(input.begin(), input.end(), [](char c) { return std::isspace(c); }));
   }
 };
 

@@ -41,3 +41,20 @@ template<class... T>
 using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
 } // namespace cxx14
+
+namespace ktl {
+
+template <size_t N, size_t... I> struct NthIndex;
+
+template <size_t N, size_t First, size_t... I>
+struct NthIndex<N, First, I...> {
+  static_assert(N <= sizeof...(I), "Index out of bound");
+  static constexpr size_t value = NthIndex<N - 1, I...>::value;
+};
+
+template <size_t First, size_t... I>
+struct NthIndex<0, First, I...> {
+  static constexpr size_t value = First;
+};
+
+}
