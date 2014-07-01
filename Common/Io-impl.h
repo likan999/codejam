@@ -9,7 +9,7 @@
 #include <type_traits>
 #include <vector>
 
-#include <glog/logging.h>
+#include "glog/logging.h"
 
 #include "Common/IntegerSequence.h"
 #include "Common/StreamScanf.h"

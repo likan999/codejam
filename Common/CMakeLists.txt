@@ -20,6 +20,7 @@ target_link_libraries(Io INTERFACE
 
 add_library(Main Main.cpp)
 target_link_libraries(Main
+  ${Boost_LIBRARIES}
   ${Glog_LIBRARIES}
   Executor
 )
@@ -27,4 +28,11 @@ target_link_libraries(Main
 add_library(StreamScanf StreamScanf.cpp)
 target_link_libraries(StreamScanf
   ${Glog_LIBRARIES}
+)
+
+add_executable(OutputCompareTest OutputCompareTest.cpp)
+target_link_libraries(OutputCompareTest
+  ${Boost_LIBRARIES}
+  ${Glog_LIBRARIES}
+  ${GTEST_LIBRARIES}
 )
