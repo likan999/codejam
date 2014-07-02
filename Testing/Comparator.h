@@ -26,4 +26,14 @@ class TypedComparator<double> : public Comparator {
   double epsilon_;
 };
 
+template <>
+class TypedComparator<std::string> : public Comparator {
+ public:
+  TypedComparator(const std::string& spec);
+  virtual void readAndCompare(std::istream& expectedStream, std::istream& actualStream) override;
+
+ private:
+  bool wholeLine_;
+};
+
 #include "Comparator-impl.h"

@@ -61,6 +61,7 @@ Options ParseCommandLineArguments(int argc, char** argv) {
 const static unordered_map<string, function<Comparator*(const string& spec)>> comparatorMap = {
   {"int", [](const string& spec) { return new TypedComparator<int>(spec); }},
   {"double", [](const string& spec) { return new TypedComparator<double>(spec); }},
+  {"string", [](const string& spec) { return new TypedComparator<string>(spec); }},
 };
 
 vector<unique_ptr<Comparator>> buildComparators(const vector<string>& specs) {
