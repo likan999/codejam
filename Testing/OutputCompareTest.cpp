@@ -1,12 +1,11 @@
-#include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <boost/program_options/options_description.hpp>
@@ -17,53 +16,12 @@
 #include "glog/logging.h"
 #include "gtest/gtest.h"
 
+#include "Testing/Comparator.h"
+#include "Testing/Utility.h"
+
 using namespace std;
 
 namespace po = boost::program_options;
-
-// Some utility functions.
-vector<string> tokenize(const string& s, char sep) {
-  vector<string> tokens;
-  size_t pos = 0;
-  do {
-    size_t next = s.find(sep, pos);
-    string token;
-    if (next == string::npos) {
-      token = s.substr(pos);
-      pos = string::npos;
-    } else {
-      token = s.substr(pos, next - pos);
-      pos = next + 1;
-    }
-    if (!token.empty()) {
-      tokens.emplace_back(token);
-    }
-  } while (pos != string::npos);
-  return tokens;
-}
-
-// Some gtest predicates.
-::testing::AssertionResult isPrefix(const std::string& prefix, const std::string& s) {
-  if (s.substr(0, prefix.length()) != prefix) {
-    return ::testing::AssertionFailure() << "`" << prefix << "` is not prefix of `" << s << "`";
-  } else {
-    return ::testing::AssertionSuccess();
-  }
-}
-
-::testing::AssertionResult isApproximatelyEqual(double expected, double actual, double epsilon) {
-  double delta = abs(expected - actual);
-  if (delta <= epsilon) {
-    return ::testing::AssertionSuccess();
-  }
-  if (abs(expected) <= epsilon || abs(actual) <= epsilon) {
-    return ::testing::AssertionFailure() << "either " << expected << " or " << actual << " is too close to zero(" << epsilon << ")";
-  }
-  if (abs(delta / expected) <= epsilon || abs(delta/actual) <= epsilon) {
-    return ::testing::AssertionSuccess();
-  }
-  return ::testing::AssertionFailure() << expected << " and " << actual << " have relative difference more than " << epsilon;
-}
 
 // Command line options.
 struct Options {
@@ -100,60 +58,6 @@ Options ParseCommandLineArguments(int argc, char** argv) {
   return options;
 }
 
-// Define comparators.
-class Comparator {
- public:
-  virtual ~Comparator() = default;
-  virtual void readAndCompare(istream& expectedStream, istream& actualStream) = 0;
-};
-
-template <typename T>
-class TypedComparator : public Comparator {
- public:
-  TypedComparator(const string& spec) {
-    CHECK(spec.empty()) << "spec `" << spec << "` should be empty";
-  }
-
-  virtual void readAndCompare(istream& expectedStream, istream& actualStream) override {
-    T expected, actual;
-    expectedStream >> expected;
-    actualStream >> actual;
-    EXPECT_EQ(expected, actual);
-  }
-};
-
-template <>
-class TypedComparator<double> : public Comparator {
- public:
-  TypedComparator(const string& spec) {
-    auto tokens = tokenize(spec, ':');
-    vector<const char*> args = { "TypedComparator<double>" };
-    for (auto& token: tokens) {
-      token = "--" + token;
-      args.emplace_back(token.c_str());
-    }
-
-    po::options_description desc;
-    desc.add_options()
-      ("eps", po::value<double>(&epsilon_)->default_value(1e-6), "epsilon")
-    ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(args.size(), args.data(), desc), vm);
-    po::notify(vm);
-  }
-
-  virtual void readAndCompare(istream& expectedStream, istream& actualStream) override {
-    double expected, actual;
-    expectedStream >> expected;
-    actualStream >> actual;
-    EXPECT_TRUE(isApproximatelyEqual(expected, actual, epsilon_));
-  }
-
- private:
-  double epsilon_;
-};
-
 const static unordered_map<string, function<Comparator*(const string& spec)>> comparatorMap = {
   {"int", [](const string& spec) { return new TypedComparator<int>(spec); }},
   {"double", [](const string& spec) { return new TypedComparator<double>(spec); }},
@@ -187,10 +91,10 @@ TEST(CompareOutput, All) {
   vector<string> actualLines;
   string line;
   while (getline(expectedStream, line)) {
-    expectedLines.emplace_back(line);
+    expectedLines.emplace_back(move(line));
   }
   while (getline(actualStream, line)) {
-    actualLines.emplace_back(line);
+    actualLines.emplace_back(move(line));
   }
   EXPECT_EQ(expectedLines.size(), actualLines.size());
   size_t numLines = expectedLines.size();

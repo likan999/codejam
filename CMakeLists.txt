@@ -65,6 +65,7 @@ include_directories(${CMAKE_BINARY_DIR})
 enable_testing()
 
 add_subdirectory(Common)
+add_subdirectory(Testing)
 add_subdirectory(2008)
 add_subdirectory(2013)
 add_subdirectory(2014)
