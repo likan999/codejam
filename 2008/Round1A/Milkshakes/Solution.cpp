@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/variant/variant.hpp>
+
 #include "Common/Executor.h"
 #include "Common/Io.h"
 
@@ -16,13 +18,13 @@ struct Customer {
   bool satisfied = false;
 };
 
-string compute(int n, const vector<vector<pair<int, bool>>>& c) {
+boost::variant<string, vector<int>> compute(int n, const vector<vector<pair<int, bool>>>& c) {
   int m = c.size();
   vector<Customer> customers(m);
   vector<vector<Customer*>> maltedCustomers(n);
   vector<vector<Customer*>> unMaltedCustomers(n);
   vector<Customer*> next;
-  vector<bool> choices(n);
+  vector<int> choices(n);
   for (int i = 0; i < m; i++) {
     Customer& customer = customers[i];
     for (const auto& p: c[i]) {
@@ -48,7 +50,7 @@ string compute(int n, const vector<vector<pair<int, bool>>>& c) {
       if (flavor == -1) {
         return "IMPOSSIBLE";
       }
-      choices[flavor] = true;
+      choices[flavor] = 1;
       for (auto* cc: maltedCustomers[flavor]) {
         cc->satisfied = true;
       }
@@ -62,14 +64,7 @@ string compute(int n, const vector<vector<pair<int, bool>>>& c) {
       }
     }
   }
-  stringstream ss;
-  for (int i = 0; i < n; i++) {
-    if (i > 0) {
-      ss << ' ';
-    }
-    ss << (choices[i] ? '1' : '0');
-  }
-  return ss.str();
+  return choices;
 }
 
 std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));

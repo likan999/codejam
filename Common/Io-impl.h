@@ -9,6 +9,10 @@
 #include <type_traits>
 #include <vector>
 
+#include <boost/variant/apply_visitor.hpp>
+#include <boost/variant/variant.hpp>
+#include <boost/variant/static_visitor.hpp>
+
 #include "glog/logging.h"
 
 #include "Common/IntegerSequence.h"
@@ -165,6 +169,38 @@ struct Reader<std::vector<T>, Option, void> {
     Reader<std::size_t, Option>::read(is, size);
     input.resize(size);
     detail::readVectorElements<Option>(is, input, size);
+  }
+};
+
+template <typename T>
+struct Writer<std::vector<T>, void> {
+  static void write(std::ostream& os, const std::vector<T>& output) {
+    for (size_t i = 0; i < output.size(); i++) {
+      if (i > 0) {
+        os << ' ';
+      }
+      Writer<T>::write(os, output[i]);
+    }
+  }
+};
+
+// Specialization for boost::variant.
+template <typename... T>
+struct Writer<boost::variant<T...>, void> {
+  struct VariantWriter : boost::static_visitor<> {
+    VariantWriter(std::ostream& os) : os_(os) {
+    }
+
+    template <typename U>
+    void operator() (const U& u) const {
+      Writer<U>::write(os_, u);
+    }
+
+    std::ostream& os_;
+  };
+
+  static void write(std::ostream& os, const boost::variant<T...>& output) {
+    boost::apply_visitor(VariantWriter(os), output);
   }
 };
 

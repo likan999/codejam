@@ -13,6 +13,7 @@ add_library(IntegerSequence INTERFACE)
 
 add_library(Io INTERFACE)
 target_link_libraries(Io INTERFACE
+  ${Boost_LIBRARIES}
   ${Glog_LIBRARIES}
   IntegerSequence
   StreamScanf
