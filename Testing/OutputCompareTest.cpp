@@ -112,6 +112,8 @@ TEST(CompareOutput, All) {
     for (const auto& comparator: comparators) {
       comparator->readAndCompare(expectedStream, actualStream);
     }
+    EXPECT_TRUE(expectedStream.eof());
+    EXPECT_TRUE(actualStream.eof());
   }
 }
 
