@@ -15,18 +15,13 @@ vector<string> tokenize(const string& s, char sep) {
   size_t pos = 0;
   do {
     size_t next = s.find(sep, pos);
-    string token;
-    if (next == string::npos) {
-      token = s.substr(pos);
-      pos = string::npos;
-    } else {
-      token = s.substr(pos, next - pos);
-      pos = next + 1;
+    size_t count = next == string::npos ? string::npos : next - pos;
+    tokens.emplace_back(s.substr(pos, count));
+    if (tokens.back().empty()) {
+      tokens.pop_back();
     }
-    if (!token.empty()) {
-      tokens.emplace_back(move(token));
-    }
-  } while (pos != string::npos);
+    pos = next + 1;
+  } while (pos != string::npos + 1);
   return tokens;
 }
 
