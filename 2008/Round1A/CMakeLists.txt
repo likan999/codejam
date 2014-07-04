@@ -4,3 +4,4 @@ project(2008/Round1A)
 
 add_subdirectory(MinimumScalarProduct)
 add_subdirectory(Milkshakes)
+add_subdirectory(Numbers)

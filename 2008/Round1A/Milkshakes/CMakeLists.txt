@@ -3,7 +3,6 @@ cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 project(2008/Round1A/Milkshakes)
 
 add_solver_executable(2008-Round1A-Milkshakes Solution.cpp)
-target_link_libraries(2008-Round1A-Milkshakes Io)
 set_target_properties(2008-Round1A-Milkshakes PROPERTIES OUTPUT_NAME Milkshakes)
 
 add_solver_test(2008-Round1A-Milkshakes Example example.in example.out string:whole-line)
