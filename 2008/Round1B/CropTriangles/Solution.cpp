@@ -1,6 +1,6 @@
 #include <cstdint>
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -32,4 +32,4 @@ int64_t compute(int n, int A, int B, int C, int D, int x0, int y0, int M) {
   return total / 6;
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

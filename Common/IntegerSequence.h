@@ -44,17 +44,17 @@ using index_sequence_for = make_index_sequence<sizeof...(T)>;
 
 namespace ktl {
 
-template <size_t N, size_t... I> struct NthIndex;
+template <std::size_t N, std::size_t... I> struct NthIndex;
 
-template <size_t N, size_t First, size_t... I>
+template <std::size_t N, std::size_t First, std::size_t... I>
 struct NthIndex<N, First, I...> {
   static_assert(N <= sizeof...(I), "Index out of bound");
-  static constexpr size_t value = NthIndex<N - 1, I...>::value;
+  static constexpr std::size_t value = NthIndex<N - 1, I...>::value;
 };
 
-template <size_t First, size_t... I>
+template <std::size_t First, std::size_t... I>
 struct NthIndex<0, First, I...> {
-  static constexpr size_t value = First;
+  static constexpr std::size_t value = First;
 };
 
-}
+} // namespace ktl

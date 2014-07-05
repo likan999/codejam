@@ -5,8 +5,8 @@
 
 using namespace std;
 
-#include "Common/Executor.h"
-#include "Common/Io.h"
+#include "Runner/Io.h"
+#include "Runner/Runner.h"
 
 constexpr char Format[] = "%d:%d %d:%d";
 
@@ -49,4 +49,4 @@ pair<int, int> compute(
   return make_pair(computeOneSide(aDeparture, bArrival), computeOneSide(bDeparture, aArrival));
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

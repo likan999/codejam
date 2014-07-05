@@ -2,7 +2,7 @@
 #include <cmath>
 #include <memory>
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -48,4 +48,4 @@ double compute(int n, int x, int y) {
   return 1 - exp(sumExp - r * log(2.0));
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

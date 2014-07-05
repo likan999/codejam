@@ -1,16 +1,16 @@
 #include <algorithm>
-#include <memory>
 #include <limits>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 using namespace std;
 
-#include "Common/Executor.h"
-#include "Common/Io.h"
+#include "Runner/Io.h"
+#include "Runner/Runner.h"
 
-int compute(io::StringOccupiesWholeLine<>, vector<string> engines, vector<string> queries) {
+int compute(io::StringOccupiesWholeLine<>, const vector<string>& engines, const vector<string>& queries) {
   const size_t npos = static_cast<size_t>(-1);
   size_t s = engines.size(), q = queries.size();
   if (q == 0) {
@@ -42,4 +42,4 @@ int compute(io::StringOccupiesWholeLine<>, vector<string> engines, vector<string
   return minimumSwitch;
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

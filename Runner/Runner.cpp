@@ -1,15 +1,15 @@
-#include "Executor.h"
+#include "Runner.h"
 
 #include "glog/logging.h"
 
-void Executor::runInstance() {
+void Runner::runInstance() {
   CHECK(instance) << "instance object is null";
   instance->run();
 }
 
-void FunctionalExecutor::run() {
+void FunctionRunner::run() {
   if (initializer_) {
     initializer_();
   }
-  solverWrapper_();
+  runnerWrapper_();
 }

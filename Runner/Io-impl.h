@@ -16,7 +16,7 @@
 #include "glog/logging.h"
 
 #include "Common/IntegerSequence.h"
-#include "Common/StreamScanf.h"
+#include "Runner/StreamScanf.h"
 
 namespace io {
 
@@ -73,7 +73,7 @@ struct TupleReader<Tuple, Option, NextIndex, Scanf<N, Format>, Elements...> {
   }
 };
 
-template <typename Tuple, typename Option, std::size_t NextIndex, size_t N, size_t M, size_t... Indices, typename... Elements>
+template <typename Tuple, typename Option, std::size_t NextIndex, std::size_t N, std::size_t M, std::size_t... Indices, typename... Elements>
 struct TupleReader<Tuple, Option, NextIndex, PackedVector<N, M, Indices...>, Elements...> {
   static_assert(sizeof...(Indices) == 0 || sizeof...(Indices) == N, "Indices list should have exactly N elements if it is not omitted");
   static_assert(sizeof...(Indices) > 0 || N == M, "PackedVector should have the same N and M if Indices list is omitted");
@@ -175,7 +175,7 @@ struct Reader<std::vector<T>, Option, void> {
 template <typename T>
 struct Writer<std::vector<T>, void> {
   static void write(std::ostream& os, const std::vector<T>& output) {
-    for (size_t i = 0; i < output.size(); i++) {
+    for (std::size_t i = 0; i < output.size(); i++) {
       if (i > 0) {
         os << ' ';
       }
@@ -207,6 +207,9 @@ struct Writer<boost::variant<T...>, void> {
 // Disable operator>> for dummy parameters.
 template <std::size_t N, const char* Format>
 std::istream& operator>>(std::istream&, Scanf<N, Format>&) = delete;
+
+template <std::size_t N, std::size_t M = N, std::size_t... Indices>
+std::istream& operator>>(std::istream&, PackedVector<N, M, Indices...>&) = delete;
 
 template <bool Enabled>
 std::istream& operator>>(std::istream&, StringOccupiesWholeLine<Enabled>&) = delete;

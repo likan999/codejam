@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 double square(double x) {
   return x * x;
@@ -70,4 +70,4 @@ double compute(double f, double R, double t, double r, double g) {
   return 1 - total * square(inner / R) / atan(1);
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

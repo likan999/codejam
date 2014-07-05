@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <string>
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -41,4 +41,4 @@ string compute(int n) {
   return buf;
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));

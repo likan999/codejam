@@ -12,7 +12,7 @@
 
 #include "glog/logging.h"
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -55,5 +55,5 @@ int main(int argc, char* argv[]) {
 
   ParseCommandLineArguments(argc, argv);
 
-  Executor::runInstance();
+  Runner::runInstance();
 }

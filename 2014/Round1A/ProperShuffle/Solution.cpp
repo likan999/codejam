@@ -2,9 +2,9 @@
 #include <memory>
 #include <vector>
 
-#include <glog/logging.h>
+#include "glog/logging.h"
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -54,4 +54,4 @@ const char* classify(const vector<int>& v) {
   return sum <= threshold ? "GOOD" : "BAD";
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&classify, &initialize));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&classify, &initialize));

@@ -6,7 +6,7 @@
 #include <tuple>
 
 #include "Common/IntegerSequence.h"
-#include "Common/Io.h"
+#include "Runner/Io.h"
 
 namespace detail {
 
@@ -17,8 +17,8 @@ auto invoke(Function function, const Tuple& tuple, cxx14::index_sequence<Indices
 }
 
 template <typename Out, typename... In>
-std::function<void()> getSolverWrapper(Out (*solver)(In...), std::istream& is, std::ostream& os) {
-  return [solver, &is, &os]() {
+std::function<void()> getRunnerWrapper(Out (*runner)(In...), std::istream& is, std::ostream& os) {
+  return [runner, &is, &os]() {
     is.exceptions(std::istream::failbit);
 
     std::size_t n;
@@ -28,7 +28,7 @@ std::function<void()> getSolverWrapper(Out (*solver)(In...), std::istream& is, s
       Input input;
       io::Reader<Input>::read(is, input);
       using Output = typename std::decay<Out>::type;
-      Output output = detail::invoke(solver, input, cxx14::index_sequence_for<In...>());
+      Output output = detail::invoke(runner, input, cxx14::index_sequence_for<In...>());
       os << "Case #" << i << ": ";
       io::Writer<Output>::write(os, output);
       os << '\n';
@@ -39,7 +39,7 @@ std::function<void()> getSolverWrapper(Out (*solver)(In...), std::istream& is, s
 } // namespace detail
 
 template <typename Out, typename... In>
-FunctionalExecutor::FunctionalExecutor(Out (*solver)(In...), void (*initializer)(), std::istream& is, std::ostream& os) {
-  solverWrapper_ = detail::getSolverWrapper(solver, is, os);
+FunctionRunner::FunctionRunner(Out (*runner)(In...), void (*initializer)(), std::istream& is, std::ostream& os) {
+  runnerWrapper_ = detail::getRunnerWrapper(runner, is, os);
   initializer_ = initializer;
 }

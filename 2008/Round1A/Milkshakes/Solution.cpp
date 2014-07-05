@@ -4,7 +4,7 @@
 
 #include <boost/variant/variant.hpp>
 
-#include "Common/Executor.h"
+#include "Runner/Runner.h"
 
 using namespace std;
 
@@ -63,4 +63,4 @@ boost::variant<string, vector<int>> compute(int n, const vector<vector<pair<int,
   return choices;
 }
 
-std::unique_ptr<Executor> Executor::instance(new FunctionalExecutor(&compute));
+std::unique_ptr<Runner> Runner::instance(new FunctionRunner(&compute));
