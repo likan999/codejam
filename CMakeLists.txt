@@ -3,19 +3,13 @@ cmake_minimum_required (VERSION 3.0 FATAL_ERROR)
 # Script directory.
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/Scripts)
 
+# Include necessary utility scripts.
+include(CheckCXX11)
+include(Utils)
+
 # Enable LTO
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE 1)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO 1)
-
-include(CheckCXXCompilerFlag)
-
-# Requires C++11.
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" STD_CXX0X_FLAGS_SUPPORTED)
-if (STD_CXX0X_FLAGS_SUPPORTED)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-  message(FATAL_ERROR "The compiler doesn't support -std=c++0x compiler flag")
-endif()
 
 # Find Boost library.
 set(Boost_USE_STATIC_LIBS ON)
@@ -24,16 +18,17 @@ find_package(Boost REQUIRED COMPONENTS
 )
 
 # Find glog library.
-find_path(Glog_INCLUDE_DIR NAMES glog/logging.h)
-find_library(Glog_LIBRARY NAMES glog)
-set(Glog_INCLUDE_DIRS ${Glog_INCLUDE_DIR})
-set(Glog_LIBRARIES ${Glog_LIBRARY})
+find_non_standard_package(Folly REQUIRED)
+
+# Find glog library.
+find_non_standard_package(Glog REQUIRED)
 
 # Find gtest library.
 find_package(GTest REQUIRED)
 
 # Add common include directories.
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(${Folly_INCLUDE_DIRS})
 include_directories(${Glog_INCLUDE_DIRS})
 include_directories(${GTEST_INCLUDE_DIRS})
 
@@ -44,6 +39,11 @@ macro(add_solver_executable NAME)
   if (TARGET ${NAME})
     get_target_property(__tmp_IS_TARGET_IMPORTED ${NAME} IMPORTED)
     if (NOT ${__tmp_IS_TARGET_IMPORTED})
+      # Make the executable name shorter.
+      split_string(${NAME} "-" __tmp_SPLITTED_NAME)
+      list(GET __tmp_SPLITTED_NAME -1 __tmp_EXECUTABLE_NAME)
+      set_target_properties(${NAME} PROPERTIES OUTPUT_NAME ${__tmp_EXECUTABLE_NAME})
+      # Link to necessary libraries.
       target_link_libraries(${NAME} Runner)
       target_link_libraries(${NAME} Runner-Main)
     endif()

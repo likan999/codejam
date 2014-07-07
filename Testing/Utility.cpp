@@ -9,22 +9,6 @@
 
 using namespace std;
 
-// Some utility functions.
-vector<string> tokenize(const string& s, char sep) {
-  vector<string> tokens;
-  size_t pos = 0;
-  do {
-    size_t next = s.find(sep, pos);
-    size_t count = next == string::npos ? string::npos : next - pos;
-    tokens.emplace_back(s.substr(pos, count));
-    if (tokens.back().empty()) {
-      tokens.pop_back();
-    }
-    pos = next + 1;
-  } while (pos != string::npos + 1);
-  return tokens;
-}
-
 // Some gtest predicates.
 ::testing::AssertionResult isPrefix(const std::string& prefix, const std::string& s) {
   if (s.substr(0, prefix.length()) != prefix) {

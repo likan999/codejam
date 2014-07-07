@@ -5,6 +5,7 @@ project(Testing)
 add_executable(OutputCompareTest OutputCompareTest.cpp)
 target_link_libraries(OutputCompareTest
   ${Boost_LIBRARIES}
+  ${Folly_LIBRARIES}
   ${Glog_LIBRARIES}
   ${GTEST_LIBRARIES}
   Test-Comparator
@@ -14,11 +15,13 @@ target_link_libraries(OutputCompareTest
 add_library(Test-Comparator Comparator.cpp)
 target_link_libraries(Test-Comparator
   ${Boost_LIBRARIES}
+  ${Folly_LIBRARIES}
   ${GTEST_LIBRARIES}
   Test-Utility
 )
 
 add_library(Test-Utility Utility.cpp)
 target_link_libraries(Test-Utility
+  ${Folly_LIBRARIES}
   ${GTEST_LIBRARIES}
 )

@@ -12,6 +12,7 @@
 #include <functional>
 #include <iostream>
 
+#include "folly/ScopeGuard.h"
 #include "glog/logging.h"
 
 using namespace std;
@@ -50,20 +51,6 @@ ssize_t readStream(void *cookie, char *buf, size_t size) {
   return 1;
 }
 
-class Finally {
- public:
-  template <typename Function>
-  Finally(Function f) : f_(f) {
-  }
-
-  ~Finally() {
-    f_();
-  }
-
- private:
-  std::function<void()> f_;
-};
-
 } // namespace
 
 int streamScanf(istream& is, const char* format, ...) {
@@ -77,17 +64,17 @@ int streamScanf(istream& is, const char* format, ...) {
 
   // Clear exception mask.
   ios_base::iostate mask = is.exceptions();
-  Finally restoreMask([mask, &is]() {
+  SCOPE_EXIT {
       is.exceptions(mask);
-  });
+  };
   is.exceptions(ios_base::goodbit);
 
   // Create the C-style file stream.
   FILE* file = fopencookie(&s, "r", cookieIoFunctions);
   CHECK(file != NULL);
-  Finally closeFile([file]() {
+  SCOPE_EXIT {
       CHECK(fclose(file) == 0) << "Failed to close FILE*: " << strerror(errno);
-  });
+  };
 
   // Turn off any buffer.
   setbuf(file, nullptr);

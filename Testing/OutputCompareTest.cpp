@@ -13,6 +13,7 @@
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "folly/String.h"
 #include "glog/logging.h"
 #include "gtest/gtest.h"
 
@@ -53,7 +54,7 @@ Options ParseCommandLineArguments(int argc, char** argv) {
 
   po::notify(vm);
 
-  options.specs = tokenize(specs, ',');
+  folly::split(',', specs, options.specs);
 
   return options;
 }

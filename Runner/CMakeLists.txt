@@ -26,5 +26,6 @@ target_link_libraries(Runner-Main
 
 add_library(Runner-StreamScanf StreamScanf.cpp)
 target_link_libraries(Runner-StreamScanf
+  ${Folly_LIBRARIES}
   ${Glog_LIBRARIES}
 )

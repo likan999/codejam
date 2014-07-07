@@ -8,6 +8,7 @@
 #include <boost/program_options/value_semantic.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include "folly/String.h"
 #include "gtest/gtest.h"
 
 #include "Testing/Utility.h"
@@ -19,7 +20,8 @@ namespace po = boost::program_options;
 namespace {
 
 void parseCommandLine(const char* arg0, const string& spec, const po::options_description& desc, po::variables_map& vm) {
-  auto tokens = tokenize(spec, ':');
+  vector<string> tokens;
+  folly::split(':', spec, tokens, true);
   vector<const char*> args = { arg0 };
   for (auto& token: tokens) {
     token = "--" + token;

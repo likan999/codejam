@@ -4,7 +4,6 @@ project(2008/QualificationRound/TrainTimetable)
 
 add_solver_executable(2008-QualificationRound-TrainTimetable Solution.cpp)
 target_link_libraries(2008-QualificationRound-TrainTimetable Runner-Io)
-set_target_properties(2008-QualificationRound-TrainTimetable PROPERTIES OUTPUT_NAME TrainTimetable)
 
 add_solver_test(2008-QualificationRound-TrainTimetable Example example.in example.out int,int)
 add_solver_test(2008-QualificationRound-TrainTimetable Small B-small-practice.in B-small-practice.out int,int)
